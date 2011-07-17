@@ -1,0 +1,56 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Template.master.cs" Inherits="Template" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>MySeeSmartLED</title>
+    <asp:ContentPlaceHolder id="Head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+<a href="login.aspx?SignOut=Y>logout</a>
+    <div id="header">
+		<h3>Lastest News</h3>
+		<div id="divNews" runat="server"></div>
+    </div>
+    <div id="sidebar">
+		<h3>Links</h3>
+        <ul>
+			<li>Home</li>
+			<li>Account</li>
+			<asp:Repeater ID="repeaterSideBarLinks" runat="server">
+				<ItemTemplate>
+					<li><a href="<%# DataBinder.Eval(Container.DataItem, "Url") %>"><%# DataBinder.Eval(Container.DataItem, "Text") %></a></li>
+				</ItemTemplate>
+			</asp:Repeater>
+		</ul>
+		<asp:Repeater ID="repeaterBookmarks" runat="server">
+			<HeaderTemplate>
+				<h3>Bookmarks</h3>
+				<ul>
+			</HeaderTemplate>
+			<ItemTemplate>
+				<li><a href=""></a></li>
+			</ItemTemplate>
+			<FooterTemplate>
+				</ul>
+			</FooterTemplate>
+		</asp:Repeater>
+		<h3>Twitter Feed</h3>
+		<ul>
+			<li id="liTwitterContent" runat="server"></li>
+			<li>Follow us on Twitter!</li>
+		</ul>
+		<h3>Recent Blog Update</h3>
+		<ul>
+			<li id="liBlogContent" runat="server"></li>
+		</ul>
+    </div>
+    <div id="content">
+        <asp:ContentPlaceHolder id="MainContent" runat="server">
+			
+        </asp:ContentPlaceHolder>
+    </div>
+</body>
+</html>

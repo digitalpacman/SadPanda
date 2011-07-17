@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SadPanda.TestService", "SadPanda.TestService\SadPanda.TestService.csproj", "{1927A4B7-9545-4C4A-B65C-7B924FD7E736}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SadPanda.Services.Setup", "..\SadPanda.Services.Setup\SadPanda.Services.Setup.vdproj", "{A4023BFC-E097-4BE9-9E91-5DB857B2DBDA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1927A4B7-9545-4C4A-B65C-7B924FD7E736}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1927A4B7-9545-4C4A-B65C-7B924FD7E736}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1927A4B7-9545-4C4A-B65C-7B924FD7E736}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1927A4B7-9545-4C4A-B65C-7B924FD7E736}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4023BFC-E097-4BE9-9E91-5DB857B2DBDA}.Debug|Any CPU.ActiveCfg = Debug
+		{A4023BFC-E097-4BE9-9E91-5DB857B2DBDA}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

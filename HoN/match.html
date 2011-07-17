@@ -1,0 +1,4453 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>WIP Match Replay</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/hon.css" type="text/css">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/fonts.css" type="text/css">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/window.css" type="text/css">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/stats.css" type="text/css">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/corners.css" type="text/css">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/jScrollPane.css" type="text/css">
+<link rel="stylesheet" href="http://www.heroesofnewerth.com/css/jcombox.css" type="text/css" />
+
+<style type="text/css">
+.autocomp_display_item a {
+display:block;
+height:100%;
+text-decoration:none;
+}
+.autocomp_display_item a:link {
+text-decoration:none;
+}
+.autocomp_display_item a:visited {
+text-decoration:none;
+}
+.replay_hero_avatar{
+text-align: center;
+font-family:Tahoma,Arial,Verdana,Helvetica,sans-serif; font-size:10px; color:#fff; text-decoration: none;
+margin-bottom: 4px;
+}
+.preord_gamefeat {
+height:28px;
+margin-bottom:3px;
+padding:0;
+position:relative;
+}
+.preord_gamefeat img {
+float:left;
+height:28px;
+margin-right:5px;
+width:28px;
+}
+.preord_gamefeat p {
+color:#DCDCDC;
+font-size:12px;
+font-weight:bold;
+margin:0;
+padding:6px 0 0;
+}
+.preord_benefit {
+height:26px;
+margin-bottom:8px;
+padding:0;
+position:relative;
+}
+.preord_benefit img {
+float:left;
+height:26px;
+margin-right:5px;
+width:26px;
+}
+.preord_benefit p {
+color:#DCDCDC;
+font-size:14px;
+font-weight:bold;
+margin:0;
+padding:4px 0 0;
+}
+.preord_supportbox {
+-moz-background-clip:border;
+-moz-background-inline-policy:continuous;
+-moz-background-origin:padding;
+background:#011013 url(../images/index_benefitblue_bg.jpg) repeat-x scroll 0 0;
+border:1px solid #082F54;
+margin:0 4px 20px 4px;
+min-height:90px;
+padding:6px;
+}
+.preord_supportbox_title {
+color:#59C2F7;
+font-family:Tahoma,Arial,Verdana,Helvetica,sans-serif;
+font-size:14px;
+margin-bottom:5px;
+text-align:left;
+}
+.preord_supportbox p {
+line-height:1.5;
+margin:0;
+text-align:left;
+}
+</style>
+
+<script type="text/javascript" src="http://www.heroesofnewerth.com/js/jquery-1.3.js"></script>
+<script type="text/javascript" src="http://www.heroesofnewerth.com/js/jScrollPane.js"></script>
+<script type="text/javascript" src="http://www.heroesofnewerth.com/js/jquery.mousewheel.js"></script>
+<script type="text/javascript" src="http://www.heroesofnewerth.com/js/jquery.autogrow.js"></script>
+<script type="text/javascript" src="http://www.heroesofnewerth.com/js/jQuery.styledSelect.js"></script>
+
+
+<script language=javascript>
+
+function showIt(div){
+     if (document.getElementById) {  // for Netscape
+       myDiv = document.getElementById(div);
+          myDiv.style.display = 'block';
+     }
+
+     if (document.all) {     // for IE
+       eval("myDiv = "+div+";");
+          myDiv.style.display = 'block';
+     }
+}
+function hideIt(div){
+     if (document.getElementById) {  // for Netscape
+       myDiv = document.getElementById(div);
+          myDiv.style.display = 'none';
+     }
+
+     if (document.all) {     // for IE
+       eval("myDiv = "+div+";");
+          myDiv.style.display = 'none';
+     }
+}
+
+function getMatchStats(mid, aid)
+{
+    var req = null;
+    postvars = "mid="+mid+"&aid="+aid;
+
+    document.getElementById("win-stone_content").innerHTML = "Connecting...";
+
+    showIt('player_stats');
+    showIt('player_stats_blocker');
+
+    if (window.XMLHttpRequest)
+    {
+        req = new XMLHttpRequest();
+    	if (req.overrideMimeType)
+    	{
+    		req.overrideMimeType('text/xml');
+    	}
+    } else if (window.ActiveXObject) {
+    	try {
+    		req = new ActiveXObject("Msxml2.XMLHTTP");
+    	} catch (e) {
+    		try {
+    			req = new ActiveXObject("Microsoft.XMLHTTP");
+    		} catch (e) {}
+    	}
+    }
+
+
+
+    req.onreadystatechange = function()
+    {
+    	document.getElementById("win-stone_content").innerHTML = "Loading...";
+    	if(req.readyState == 4)
+    	{
+    		if(req.status == 200)
+    		{
+    			document.getElementById("win-stone_content").innerHTML  = req.responseText;
+
+    		} else {
+    			document.getElementById("win-stone_content").innerHTML="Error: returned status code " + req.status + " " + req.statusText;
+    		}
+    	}
+    };
+    req.open("POST", "player_pop.php", true);
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    req.send(postvars);
+}
+
+
+// ScrollPane
+$(function()
+{
+
+    reinitialiseScrollPane = function()
+    {
+        showIt('view_kill_history_pop');
+        $('#kills_history').jScrollPane({showArrows:true, scrollbarWidth: 24, arrowSize: 23, dragMinHeight: 20, dragMaxHeight: 20 });
+        showIt('view_assists_history_pop');
+        $('#assists_history').jScrollPane({showArrows:true, scrollbarWidth: 24, arrowSize: 23, dragMinHeight: 20, dragMaxHeight: 20 });
+        showIt('view_death_history_pop');
+        $('#death_history').jScrollPane({showArrows:true, scrollbarWidth: 24, arrowSize: 23, dragMinHeight: 20, dragMaxHeight: 20 });
+        showIt('view_purchase_history_pop');
+        $('#purch_history').jScrollPane({showArrows:true, scrollbarWidth: 24, arrowSize: 23, dragMinHeight: 20, dragMaxHeight: 20 });
+        showIt('view_abil_history_pop');
+        $('#abil_history').jScrollPane({showArrows:true, scrollbarWidth: 24, arrowSize: 23, dragMinHeight: 20, dragMaxHeight: 20});
+        hideIt('view_kill_history_pop');
+        hideIt('view_assists_history_pop');
+        hideIt('view_death_history_pop');
+        hideIt('view_purchase_history_pop');
+        hideIt('view_abil_history_pop');
+    }
+});
+
+
+// Autogrow
+$(document).ready (function() {
+	$('textarea.expanding').autogrow();
+});
+
+// Styled Select
+$(document).ready(function() {
+	$('form#matchvote select').styledSelect({
+		selectClass: 'styledSelect138'
+	});
+});
+
+
+</script>
+
+</head>
+
+<body>
+<div id="GlobalToolTip"></div>
+<script type="text/javascript" src="http://www.heroesofnewerth.com/js/globalpop.js"></script>
+
+<div id="container">
+<img src="http://www.heroesofnewerth.com/images/enviro/2_top.jpg" id="fancybg_img" style="height:406px;">
+<img src="http://www.heroesofnewerth.com/images/enviro/2_bot.png" id="fancybg_img" style="top: 556px; height:80px;">
+
+<div id="header"></div>
+
+<div id="content">
+
+		<!-- Sub Header -->
+	<div style="position: relative; width: 100%; height: 84px;">
+
+		<img src="http://www.heroesofnewerth.com/images/sh_1.png" width="165" height="84" style="float: left;">
+		<img src="http://www.heroesofnewerth.com/images/sh_2.jpg" width="585" height="84" style="float: left;">
+		<img src="http://www.heroesofnewerth.com/images/sh_3.png" width="250" height="84" style="float: left;">
+	</div>
+	<div style="position: relative; width: 100%; height: 73px;">
+		<img src="http://www.heroesofnewerth.com/images/sh_4.jpg" width="1000" height="73" style="float: left;">
+	</div>
+	<div style="position: relative; width: 100%; height: 41px;">
+		<img src="http://www.heroesofnewerth.com/images/sh_5.gif" width="89" height="41" style="float: left;">
+
+		<div style="float: left; width: 822px; height: 41px;">
+			<div style="position: relative; height: 9px;"><img src="http://www.heroesofnewerth.com/images/shm_1.gif" width="822" height="9"></div>
+			<div style="position: relative; height: 27px; margin: 0; padding: 0;">
+				<img src="http://www.heroesofnewerth.com/images/shm_2.gif" width="2" height="27" style="float: left;">
+				<div class="sh_btn82">
+					<a href="http://beta.heroesofnewerth.com/main.php" style="color: white; text-decoration: none; margin-top: 5px;">Play Beta</a>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_msep1.gif" width="20" height="27" style="float: left;">
+
+				<div class="sh_btn76_disabled">
+					<div style="margin-top: 5px;">Wiki</div>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_msep1.gif" width="20" height="27" style="float: left;">
+				<div class="sh_btn75_disabled">
+					<div style="margin-top: 5px;">Forums</div>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_msep1.gif" width="20" height="27" style="float: left;">
+
+				<div class="sh_btn76">
+					<a href="http://replays.heroesofnewerth.com/" style="color: white; text-decoration: none; margin-top: 5px;">Replays</a>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_m2.gif" width="84" height="27" style="float: left;">
+				<div class="sh_btn76">
+					<a href="http://www.heroesofnewerth.com/heroes.php" style="color: white; text-decoration: none; margin-top: 5px;">Heroes</a>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_msep1.gif" width="20" height="27" style="float: left;">
+
+				<div class="sh_btn75">
+					<a href="http://www.heroesofnewerth.com/players/" style="color: white; text-decoration: none; margin-top: 5px;">Ladder</a>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_msep1.gif" width="20" height="27" style="float: left;">
+				<div class="sh_btn76">
+					<a href="http://www.heroesofnewerth.com/items.php" style="color: white; text-decoration: none; margin-top: 5px;">Items</a>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/sh_msep1.gif" width="20" height="27" style="float: left;">
+
+				<div class="sh_btn76">
+					<a href="http://www.heroesofnewerth.com/media.php" style="color: white; text-decoration: none; margin-top: 5px;">Media</a>
+				</div>
+				<img src="http://www.heroesofnewerth.com/images/shm_3.gif" width="4" height="27" style="float: left;">
+			</div>
+			<div style="position: relative; height: 5px;"><img src="http://www.heroesofnewerth.com/images/shm_4.gif" width="822" height="5"></div>
+		</div>
+		<img src="http://www.heroesofnewerth.com/images/sh_6.gif" width="89" height="41" style="float: left;">
+
+	</div>
+
+	<div style="position: relative; width: 100%; height: 48px;">
+		<img src="http://www.heroesofnewerth.com/images/sh_7.gif" width="483" height="48" style="float: left;">
+		<div class="submenclose" style="float: left;" ><a href="http://www.heroesofnewerth.com"></a></div>
+		<img src="http://www.heroesofnewerth.com/images/sh_8.gif" width="481" height="48" style="float: left;">
+	</div>
+
+	<!-- END Sub Header -->	
+	<!-- Game Summary -->
+
+	<div style="position: relative; width: 100%; height: 150px; margin-top: 5px; background: black; border:1px solid #666666; z-index: 2;">
+
+		<ul class="header_bar" id="header_bar_green">
+			<li>Match Details for ID <span style="color: yellow;">10956260</span></li>
+			<li style="margin-right: 14px; float:right;">Duration: <span style="color: yellow;">20m 51s</span></li>
+			<li style="margin-right: 14px; float:right;">Played: <span style="color: yellow;">11/10/2009 (8:57 AM EST)</span></li>
+
+			<li style="margin-right: 14px; float:right;">Viewed: <span style="color: yellow;">88657 Times</span></li>
+		</ul>
+
+		<!-- Info -->
+		<div id="match_info_bg">
+
+			<div style="float: left; margin-left: 5px;">
+				<ul class="matchinfo_display">
+					<li class="cat">Map</li>
+
+					<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+					<li class="stat">Caldavar</li>
+				</ul>
+			</div>
+
+			<div style="float: left;  margin-left: 5px;">
+				<ul class="matchinfo_display">
+					<li class="cat">Server</li>
+
+					<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+					<li class="stat"><span onMouseover="ddrivetip('<div class=aps-content><p>JPN 19</p></div>', '', '180')"; onMouseout="hideddrivetip()" style="cursor: help;">JPN 19</span></li>
+				</ul>
+			</div>
+
+			<div style="float: left; margin-left: 5px;">
+				<ul class="matchinfo_display">
+					<li class="cat">Name</li>
+
+					<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+					<li class="stat"><span onMouseover="ddrivetip('<div class=aps-content><p>5-5 AP No Leaverrrrrrrrr</p></div>', '', '180')"; onMouseout="hideddrivetip()" style="cursor: help;">5-5 AP No Le</span></li>
+				</ul>
+			</div>
+
+			<div style="float: left; margin-left: 5px;">
+				<ul class="matchinfo_display">
+					<li class="cat">Version</li>
+
+					<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+					<li class="stat">0.1.53.2</li>
+				</ul>
+			</div>
+
+			<div style="float: right; margin-left: 5px;">
+				<ul class="matchinfo_display">
+					<li class="cat">Mode</li>
+
+					<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+					<li class="stat" style="padding-top: 3px; margin: 0;">
+					
+					<div style="position: relative; height: 32px;">
+						<div style="float: left; margin-right: 10px;"><img onMouseover="ddrivetip('<div class=aps-content><p>Normal Mode</p></div>', '', '180')" onMouseout="hideddrivetip()" style="cursor: help;" src="http://www.heroesofnewerth.com/images/gametype_nm.gif" width=32 heigh=32></div>					
+						<div style="float: left; margin-right: 2px;"><img onMouseover="ddrivetip('<div class=aps-content><p>All Heroes</p></div>', '', '180')" onMouseout="hideddrivetip()" style="cursor: help;" src="http://www.heroesofnewerth.com/images/gameoption_ap.gif" width=32 heigh=32></div> 																		<div style="float: left;"><img onMouseover="ddrivetip('<h3>Match Options</h3><div class=aps-content><p>All Heroes<br>No Leavers<br>Official Server<br></p></div>', '', '250')" onMouseout="hideddrivetip()" style="cursor: help;" src="http://www.heroesofnewerth.com/images/gameoption_more.gif" width=32 heigh=32></div> 					</div>
+					
+					</li>
+					
+	
+
+                </ul>
+			</div>
+
+
+		</div>
+
+		<!-- Rating -->
+		<div style="height: 48px; width: 242px; margin: 4px; text-align: left; border: 1px solid #666666; float: left; padding: 5px;">
+			<span class="o14"><b>Match Rating</b></span> <span class="w12">(642 Votes | Avg 2.9)</span>
+			<div style="margin-top: 2px; padding: 0;">
+				<img src="http://www.heroesofnewerth.com/images/rating_3star.gif" width="142" height="27" style="margin-left: 50px;">
+
+			</div>
+		</div>
+
+		<!-- Vote -->
+		<div style="position: relative; height: 48px; width: 220px; margin: 4px; text-align: left; border: 1px solid #666666; float: left; padding: 5px;">
+			<span class="o14"><b>Rate Match</b></span>
+			<div style="margin-top: 4px; padding: 0;">
+                                <div style="margin-top: 9px;">You must be logged in to vote.</div>
+
+                			</div>
+		</div>
+
+		<!-- Download -->
+		<div style="height: 48px; width: 262px; margin: 4px; text-align: left; border: 1px solid #666666; float: left; padding: 5px;">
+			<span class="o14"><b>Download Replay</b></span> <span class="w12">(3.6 Mb | 14 D/Ls )</span>
+			<div style="margin: 2px 0 0 24px; padding: 0;">
+				
+								<div style="margin-top: 9px;">Replay downloading coming soon!</div>
+
+							</div>
+		</div>
+
+		<!-- Comments -->
+		<div style="height: 48px; width: 190px; margin: 4px; text-align: left; border: 1px solid #666666; float: left; padding: 5px;">
+			<span class="o14"><b>Comments</b></span> <span class="w12">(228 Comments)</span>
+			<div class="href156" style="margin: 4px 0 0 18px; text-align: center;"><a href="#comments" style="display:block; height: 100%; text-decoration: none; color: #fff;"><div style="padding-top: 5px;">View / Add Comment</div></a></div>
+
+		</div>
+
+
+	</div>
+
+	<!-- Game Winner -->
+	<div style="position: relative; z-index: 1; width: 100%; height: 44px; background: black; border:1px solid #666666; margin-top: 24px;">
+		<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" width="995" height="44" id="winner1" align="middle">
+		<param name="allowScriptAccess" value="sameDomain" />
+		<param name="movie" value="flash/winner1.swf" /><param name="wmode" value="opaque"><param name="quality" value="high" /><param name="bgcolor" value="#000000" /><embed wmode="opaque" src="flash/winner1.swf" quality="high" bgcolor="#000000" width="995" height="44" name="winner1" align="middle" allowScriptAccess="sameDomain" type="application/x-shockwave-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" />
+
+		</object>
+	</div>
+
+	<!-- Player Lists -->
+	<div style="position: relative; width: 100%; height: 236px; margin-top: 18px;">
+
+		<!-- Legion Players -->
+		<div style="position: relative; float: left; width: 490px; height: 100%; background: transparent; border:1px solid #666666;">
+
+			<ul class="header_bar">
+
+				<li>Legion Players</li>
+			</ul>
+
+			<div style="margin: 8px; text-align: left; border: 1px solid #535e6c;">
+				<table class="table-gradient" summary="Meeting Results">
+					<thead>
+						<tr>
+							<th scope="col" id="table-gradient_blue">&nbsp;</th>
+							<th scope="col" id="table-gradient_blue">Player Name</th>
+
+							<th scope="col" id="table-gradient_blue">Lvl</th>
+							<th scope="col" id="table-gradient_blue">HK</th>
+							<th scope="col" id="table-gradient_blue">D</th>
+							<th scope="col" id="table-gradient_blue">CK</th>
+							<th scope="col" id="table-gradient_blue">CD</th>
+							<th scope="col" id="table-gradient_blue">XP/Min</th>
+
+							<th align="right" scope="col" id="table-gradient_blue" style="padding-right: 7px;">Details</th>
+						</tr>
+					</thead>
+					<tbody>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/38/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=459058" id="player0">GoZMan</a></td>
+							<td><span class="stat_winner">14</span></td>
+
+							<td><span class="">6</span></td>
+							<td><span class="">5</span></td>
+							<td><span class="">49</span></td>
+							<td><span class="">0</span></td>
+							<td><span class="">415</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 459058);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+
+						</tr>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/120/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=424478" id="player1">Joestar</a></td>
+							<td><span class="">13</span></td>
+							<td><span class="stat_winner">7</span></td>
+							<td><span class="">1</span></td>
+
+							<td><span class="stat_winner">60</span></td>
+							<td><span class="">9</span></td>
+							<td><span class="stat_winner">436</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 424478);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/94/icon_25.jpg" width="25" height="25"></td>
+
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=459366" id="player2">hasamasari</a></td>
+							<td><span class="">11</span></td>
+							<td><span class="">4</span></td>
+							<td><span class="">2</span></td>
+							<td><span class="">15</span></td>
+							<td><span class="">5</span></td>
+
+							<td><span class="">313</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 459366);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/105/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=654091" id="player3">testhon</a></td>
+							<td><span class="">10</span></td>
+
+							<td><span class="">2</span></td>
+							<td><span class="">1</span></td>
+							<td><span class="">22</span></td>
+							<td><span class="">4</span></td>
+							<td><span class="">260</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 654091);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+
+						</tr>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/22/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=459202" id="player4">magayumi</a></td>
+							<td><span class="">11</span></td>
+							<td><span class="">1</span></td>
+							<td><span class="">2</span></td>
+
+							<td><span class="">41</span></td>
+							<td><span class="">4</span></td>
+							<td><span class="">302</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 459202);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+											</tbody>
+				</table>
+
+			</div>
+
+		</div>
+
+		<!-- Hellbourne Players -->
+		<div style="position: relative; float: right; width: 490px; height: 100%; border:1px solid #666666;">
+
+			<ul class="header_bar" id="header_bar_red">
+				<li>Hellbourne Players</li>
+			</ul>
+
+			<div style="margin: 8px; text-align: left; border: 1px solid #664a4a;">
+				<table class="table-gradient" summary="Meeting Results">
+					<thead>
+						<tr>
+							<th scope="col" id="table-gradient_red" style="width: 30px;">&nbsp;</th>
+							<th scope="col" id="table-gradient_red">Player Name</th>
+							<th scope="col" id="table-gradient_red">Lvl</th>
+
+							<th scope="col" id="table-gradient_red">HK</th>
+							<th scope="col" id="table-gradient_red">D</th>
+							<th scope="col" id="table-gradient_red">CK</th>
+							<th scope="col" id="table-gradient_red">CD</th>
+							<th scope="col" id="table-gradient_red">XP/Min</th>
+							<th align="right" scope="col" id="table-gradient_red" style="padding-right: 7px;">Details</th>
+
+						</tr>
+					</thead>
+					<tbody>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/8/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=627929" id="player5">[ESP]ImBaScot</a></td>
+							<td><span class="">10</span></td>
+							<td><span class="">1</span></td>
+
+							<td><span class="">6</span></td>
+							<td><span class="">42</span></td>
+							<td><span class="">5</span></td>
+							<td><span class="">272</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 627929);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+												<tr>
+
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/17/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=629350" id="player6">[gXe]TooFood</a></td>
+							<td><span class="">9</span></td>
+							<td><span class="">1</span></td>
+							<td><span class="">5</span></td>
+							<td><span class="">27</span></td>
+
+							<td><span class="">4</span></td>
+							<td><span class="">209</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 629350);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/16/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=407581" id="player7">nishin0</a></td>
+
+							<td><span class="">11</span></td>
+							<td><span class="">4</span></td>
+							<td><span class="">3</span></td>
+							<td><span class="">51</span></td>
+							<td><span class="">7</span></td>
+							<td><span class="">305</span></td>
+
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 407581);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+												<tr>
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/110/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=407955" id="player8">maxmax</a></td>
+							<td><span class="">9</span></td>
+							<td><span class="">2</span></td>
+
+							<td><span class="">5</span></td>
+							<td><span class="">22</span></td>
+							<td><span class="">4</span></td>
+							<td><span class="">247</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 407955);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+												<tr>
+
+							<td style="width: 30px;"><img src="http://www.heroesofnewerth.com/images/heroes/20/icon_25.jpg" width="25" height="25"></td>
+							<td><a href="http://www.heroesofnewerth.com/player_stats.php?aid=566479" id="player9">ayoyoayoyo</a></td>
+							<td><span class="">9</span></td>
+							<td><span class="">3</span></td>
+							<td><span class="">2</span></td>
+							<td><span class="">32</span></td>
+
+							<td><span class="stat_winner">13</span></td>
+							<td><span class="">255</span></td>
+							<td align="right"><a  href="javascript:void(0);" onClick="getMatchStats(10956260, 566479);"><img src="http://www.heroesofnewerth.com/images/sicon.gif" alt="View Stats" title="View Stats"  border="0" width="20" height="20" style="margin-right: 7px;"></a></td>
+						</tr>
+											</tbody>
+				</table>
+			</div>
+
+		</div>
+
+	</div>
+
+	<!-- Team Stats -->
+	<div class="clearfix" style="position: relative; width: 100%; margin-top: 18px;">
+
+		<!-- Legion Players -->
+		<div style="position: relative; float: left; width: 490px; background: url(http://www.heroesofnewerth.com/images/replay_battle_legion.jpg); background-repeat: no-repeat; background-position: top right; border:1px solid #666666;">
+
+			<ul class="header_bar">
+
+				<li>Legion Statistics</li>
+			</ul>
+
+			<ul class="sub_header_bar">
+				<li>Team Total Statistics</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #535e6c; height: 125px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">37,237</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Deaths</li>
+
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">11</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">17,609</span></li>
+
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Spent</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">24,727</span></li>
+					</ul>
+
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_blue">Actions Per Minute</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">91</span></li>
+					</ul>
+
+
+				</div>
+				<div style="position: relative; width: 50%; float: right; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_blue">XP/Minute</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">344</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Lost</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="stat_winner">2,460</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold/Minute</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">163</span></li>
+					</ul>
+
+					<ul class="stats_display" style="margin-top: 23px;">
+						<li class="cat" id="stats_display_blue">Hero Buy Backs</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">0</span></li>
+					</ul>
+				</div>
+			</div>
+
+			<ul class="sub_header_bar" style="margin-top: 10px;">
+				<li>Enemy Heroes</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #535e6c; height: 78px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Damage</li>
+
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">29,469</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Kills</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">20</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Assists</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">31</span></li>
+					</ul>
+				</div>
+
+				<div style="position: relative; width: 50%; float:right; display: block;">
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">5,080</span></li>
+					</ul>
+
+                    <ul class="stats_display">
+
+						<li class="cat" id="stats_display_blue">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">17,425</span></li>
+					</ul>
+				</div>
+			</div>
+
+			<ul class="sub_header_bar" style="margin-top: 10px;">
+
+				<li>Enemy Buildings</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #535e6c; height: 56px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="stat_winner">2,357</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Razes</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">4</span></li>
+					</ul>
+
+				</div>
+                <div style="position: relative; width: 50%; float:right; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">5,253</span></li>
+					</ul>
+				</div>
+
+                <div style="position: relative; width: 50%; float:right; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">0</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" style="margin-top: 10px;">
+				<li>Team Creeps</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #535e6c; height: 56px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_blue">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">76,502</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Kills</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="stat_winner">187</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">7,276</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_blue">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">19,812</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" style="margin-top: 10px;">
+				<li>Neutral Creeps</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #535e6c; height: 56px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_blue">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">0</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Kills</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="">0</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_blue">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">0</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_blue">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">0</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" style="margin-top: 10px;">
+				<li>Creep Denies</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #535e6c; height: 28px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_blue">Deny Count</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">22</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_blue">XP Denied</li>
+
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">748</span></li>
+					</ul>
+				</div>
+			</div>
+
+		</div>
+
+		<!-- Hellbourne Players -->
+
+		<div style="position: relative; float: right; width: 490px; background: url(http://www.heroesofnewerth.com/images/replay_battle_hell.jpg); background-repeat: no-repeat; background-position: top left; border:1px solid #666666;">
+
+			<ul class="header_bar" id="header_bar_red">
+				<li>Hellbourne Statistics</li>
+			</ul>
+
+			<ul class="sub_header_bar" id="sub_header_bar_red">
+				<li>Team Total Statistics</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #664a4a; height: 125px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">27,117</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Deaths</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">21</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold Earned</li>
+
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">11,875</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold Spent</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">15,280</span></li>
+
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Actions Per Minute</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">106</span></li>
+					</ul>
+
+				</div>
+
+				<div style="position: relative; width: 50%; float: right; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP/Minute</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">258</span></li>
+					</ul>
+
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_red">Gold Lost</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">4,980</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold/Minute</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="">113</span></li>
+					</ul>
+
+					<ul class="stats_display" style="margin-top: 23px;">
+						<li class="cat" id="stats_display_red">Hero Buy Backs</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">0</span></li>
+					</ul>
+
+				</div>
+			</div>
+
+			<ul class="sub_header_bar" id="sub_header_bar_red" style="margin-top: 10px;">
+				<li>Enemy Heroes</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #664a4a; height: 78px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">17,352</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Kills</li>
+
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">11</span></li>
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">Assists</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">19</span></li>
+
+					</ul>
+
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">2,860</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">7,990</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" id="sub_header_bar_red" style="margin-top: 10px;">
+				<li>Enemy Buildings</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #664a4a; height: 56px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_red">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">544</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Razes</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="">1</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">2,843</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">0</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" id="sub_header_bar_red" style="margin-top: 10px;">
+				<li>Team Creeps</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #664a4a; height: 56px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_red">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">57,714</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Kills</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="">173</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">6,139</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="">19,065</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" id="sub_header_bar_red" style="margin-top: 10px;">
+				<li>Neutral Creeps</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #664a4a; height: 56px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_red">Damage</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">1,242</span></li>
+					</ul>
+
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">Kills</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+
+						<li class="stat"><span class="stat_winner">1</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">Gold Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">33</span></li>
+
+					</ul>
+
+                    <ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP Earned</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">62</span></li>
+					</ul>
+				</div>
+
+			</div>
+
+			<ul class="sub_header_bar" id="sub_header_bar_red" style="margin-top: 10px;">
+				<li>Creep Denies</li>
+			</ul>
+
+			<div style="position: relative; margin: 4px; text-align: left; border: 1px solid #664a4a; height: 28px;">
+				<div style="position: relative; width: 50%; float:left; display: block;">
+					<ul class="stats_display">
+
+						<li class="cat" id="stats_display_red">Deny Count</li>
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">33</span></li>
+					</ul>
+				</div>
+				<div style="position: relative; width: 50%; float:right; display: block;">
+					<ul class="stats_display">
+						<li class="cat" id="stats_display_red">XP Denied</li>
+
+						<li class="arrow"><img src="http://www.heroesofnewerth.com/images/arrow.gif" width="5" height="10"></li>
+						<li class="stat"><span class="stat_winner">1,378</span></li>
+					</ul>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+
+	<!-- Comments -->
+	<a name="comments"></a>
+	<div style="position: relative; width: 100%; min-height: 200px; background: black; border:1px solid #666666; margin-top: 24px; text-align: left;">
+
+		<ul class="header_bar">
+			<li>Match Comments <span style="color: yellow;">(228 Comments)</span></li>
+		</ul>
+
+		<div style="width: 600px; margin-bottom: 20px;">
+
+			<ul class="sub_header_bar" style="margin: 4px;">
+				<li>Post a New Comment</li>
+			</ul>
+        
+			<div style="margin: 4px; text-align: center; border: 1px solid #666666; padding: 5px;">
+                            <form action="login.php?return=true" method="post">
+				<div style="height: 60px">
+
+					<div style="clear: both; text-align: left; margin: 6px 0 10px 0;">
+						You must be logged in to post a comment. Create a new account <a href="" class="o12">here</a>.
+					</div>
+
+					<div style="height: 28px; float: left; margin-left: 10px;">
+						<div style="float: left; padding-top: 7px; width: 65px;">
+							<span class="w12" style="color: white;"><b>Username:</b></span>
+						</div>
+
+						<div style="float: left; width: 25px; height: 100%; background: url(http://www.heroesofnewerth.com/images/arrow.gif) center center no-repeat;">&nbsp;</div>
+						<div class="textinput" style="float: left; width: 130px;">
+							<b class="top"><b class="b1"></b><b class="b2"></b><b class="b3"></b><b class="b4"></b></b>
+							<div class="boxcontent" style="text-align: center;">
+								<input type="text" name="username" style="background: #11131e; color: #dcdcdc; border: 0px; width: 94%;">
+							</div>
+							<b class="bottom"><b class="b4b"></b><b class="b3b"></b><b class="b2b"></b><b class="b1b"></b></b>
+						</div>
+					</div>
+
+					<div style="height: 28px; float: left; margin-left: 25px;">
+						<div style="float: left; padding-top: 7px; width: 65px;">
+							<span class="w12" style="color: white;"><b>Password:</b></span>
+						</div>
+						<div style="float: left; width: 25px; height: 100%; background: url(http://www.heroesofnewerth.com/images/arrow.gif) center center no-repeat;">&nbsp;</div>
+						<div class="textinput" style="float: left; width: 130px;">
+							<b class="top"><b class="b1"></b><b class="b2"></b><b class="b3"></b><b class="b4"></b></b>
+							<div class="boxcontent" style="text-align: center;">
+
+								<input type="password" name="password" style="background: #11131e; color: #dcdcdc; border: 0px; width: 94%;">
+							</div>
+							<b class="bottom"><b class="b4b"></b><b class="b3b"></b><b class="b2b"></b><b class="b1b"></b></b>
+						</div>
+					</div>
+
+					<div style="float: right;">
+						<input type="submit" class="button75" value="Login" style="margin-top: 3px;">
+					</div>
+
+				</div>
+				</form>
+            			</div>
+
+		</div>
+    		<!-- Comments -->
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>melmark</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 hours, 30 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				WEW weak <br />
+
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>BioDread</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 8 hours, 52 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Can anyone help me ? i dont view the match.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>BioDread</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 hours, 53 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				Can anyone help me ? i dont view the match.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>FaLOOKii</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 12 hours, 55 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				.<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>FaLOOKii</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 12 hours, 56 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				.<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>mdogg</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 hours, 26 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				> plz i dont understand how to view this match<br />
+> i dont see any buttons or anything tnx <br />
+
+<br />
+--> \"Replay downloading coming soon!\"			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>agistrint</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 1 days, 1 hours, 01 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				plz i dont understand how to view this match<br />
+i dont see any buttons or anything tnx			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>peryong</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 3 hours, 02 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				aw<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ctoph</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 3 hours, 41 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Wow, did you see that retarded stun by pebbles @ 7:05? .... That was leet...			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>alzaabi</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 4 hours, 11 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				wtf			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Rastur</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 6 hours, 30 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Humm .. hwo knows, MEBBE COZ IT\&#039;S BETA???			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>demondras</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 11 hours, 21 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				lol, cant download the replay, why the name is replay center if cant download lol.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>zikuu</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 11 hours, 29 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				てすてす			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>SnorreDiablo</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 13 hours, 15 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				Why are they linking to the video, and it\&#039;s not available? that\&#039;s a little fake?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Nicksplit</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 1 days, 18 hours, 46 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				wtf again			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Nicksplit</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 1 days, 18 hours, 53 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				wtf 			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>GiantPencil</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 2 days, 9 hours, 22 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				mean			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>GiantPencil</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 2 days, 9 hours, 23 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				mean			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>d0ke</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 2 days, 17 hours, 10 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				123			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Greedisland</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 3 days, 1 hours, 29 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				ohwwwwwwwwwww,.............<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>VeroSSoo</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 4 hours, 00 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				wytka =)			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>VeroSSoo</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 4 hours, 01 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				VCe PIDORU !!!!!!			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>sQuibba</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 9 hours, 15 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				lies			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>xYajirobex</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 9 hours, 52 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Dota on warcraft 3 is better			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>PokeMyBawls</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 14 hours, 22 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				OMG over 9000 views			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>melo7288</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 14 hours, 59 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				yes<br />
+			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>SunShin</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 21 hours, 06 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				donde mierda descargo el video?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>SunShin</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 21 hours, 09 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				muy bieno			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>SunShin</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 21 hours, 10 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				muy bieno			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>JW</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 3 days, 21 hours, 59 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				if it doesnt work, y does it say 14 D/L??			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Cap_Obvious</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 4 days, 3 hours, 02 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				Its quite funny how people are like \"OMG HOW DOES I WATCH\" um, you cant. click the \"view comment thing\" and it still doesn\&#039;t work? then dont post and read.<br />
+Oh yeah, and those people saying that how do you know what happened, click the character and view history and time of ganks. you can also view what they bought the whole game and what thier KDR was the game. All the info needed w/o a replay. stfu plz guys.<br />
+GG.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>onlimit</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 4 days, 9 hours, 04 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				good			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Asator</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 4 days, 18 hours, 44 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				The start was rather boring, but Witch Slayer had some nice ganks mid game, gg.<br />
+<br />
+Nice replay!			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Blocket</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 4 days, 19 hours, 09 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				ok.... how do i watch the game..? i dont get it...			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>warbeak1245</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 4 days, 21 hours, 23 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				I think it\&#039;s just ridiculous that slither was feeding so much, 4 deaths in the  7 minutes, it\&#039;s definitely what lost it for hellbourne, that kind of feeding can\&#039;t go unchecked. It was clearly just a lack of skill though, specifically at 5:13 and 6:41, you can see any player with half a brain could have easily juked out their chasers, how the fuck can this be called a \"solid\" matchup?			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>SJesus</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 4 days, 21 hours, 56 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				What\&#039;s happening here?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Dj4blo</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 5 days, 10 hours, 22 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how soon is soon?			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>JohnnyBGuud</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 5 days, 11 hours, 48 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				It gets really good at 02:43 onwards! My favourite part!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Mcspazatron</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 5 days, 12 hours, 02 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				... For all those people bashing others for wanting to download/view this match: <br />
+
+<br />
+How have people downloaded it even though the download button isnt there? (14 D/Ls already) 			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Afterstar</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 5 days, 20 hours, 01 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				soon™			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>pairadIIV</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 6 days, 4 hours, 25 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				good			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Alvitor</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 6 days, 6 hours, 08 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				People are asking where they can watch the video not download it.  There are many comments implying that they\&#039;ve seen this video first hand.			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Hellflame</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 6 days, 23 hours, 18 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				any idea how i can watch this?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>nationguest</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 7 days, 6 hours, 42 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				it says Replay downloading coming soon!			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>nationguest</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 7 days, 6 hours, 43 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				where the download link?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>vaxus</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 7 days, 10 hours, 48 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				SWEET! HoN Rules!!!			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>EmilioX</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 7 days, 16 hours, 00 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				This is the most unpleasent place i ever seen!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Honey_Bitch</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 7 days, 19 hours, 43 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				ffffffffffffffffffffffffffffffff			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>DrCold</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 days, 8 hours, 23 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				soooooo boing, can\&#039;t believe I\&#039;ve wasted all that time -.-			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>DrCold</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 days, 8 hours, 36 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				soooooo boing, can\&#039;t believe I\&#039;ve wasted all that time -.-			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>David_Ghrow</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 days, 14 hours, 20 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				don\&#039;t know how so many people has voted without seeing it<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Krinlekey</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 days, 15 hours, 09 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				Oh man what a good replay. So glad I downloaded and watched that.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Fadenstar</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 8 days, 22 hours, 07 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Im just getting the hand of Pyromancer as of late, really like him. Looking forward to getting some tips from this map.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>nYx13</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 8 days, 22 hours, 54 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				wee			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>bloody_X</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 9 days, 6 hours, 05 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how to watch this?<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>yaguarete</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 9 days, 15 hours, 40 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				como bajo el replay?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Blue_Icaruz</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 10 days, 1 hours, 04 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how to create clan?			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>inzQx</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 10 days, 11 hours, 48 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				Just WAIT and red fucking retarded... - Replay downloading Coming Soon ! - <br />
+<br />
+as luggass said , go to bed and cry now.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>mAriCk</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 11 days, 7 hours, 58 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				!@#$ this!			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>BlueDemon14</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 11 days, 18 hours, 48 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				WTF retarded!!! PLease read!<br />
+<br />
+Download Replay (3.6 Mb | 14 D/Ls )<br />
+Replay downloading coming soon!!!!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Skuzzie</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 12 days, 8 hours, 15 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				such awesomeness going on in this video			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>xChemistry</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 12 days, 10 hours, 11 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				weird			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Unk_</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 12 days, 20 hours, 29 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				Slither feeder o.o\&#039;			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ScreenShats</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 12 days, 22 hours, 22 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how to vieW replayS?			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ScreenShats</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 12 days, 22 hours, 26 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				how to vieW replayS?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Anaestheist</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 13 days, 7 hours, 44 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				How am i suppose to watch stupid replay\&#039;s ? and why HoN has been down for like 5 hours and more? Hurry up and put it online god damn.			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>es1x</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 13 days, 9 hours, 40 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				when we can look replays??? :D			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>BoneBrigade</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 13 days, 18 hours, 55 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				interesting that almost 450 people have voted without having seen the actual game			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>craazycriipk</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 13 days, 19 hours, 24 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				xD. >.< CAPITAL lol ..			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>X1roX</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 14 days, 7 hours, 39 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how do you view the matches? :o			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>PachoVelasco</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 14 days, 12 hours, 19 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				WTF???...coming soon?...lol			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>kruekkub</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 14 days, 17 hours, 01 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				haahaha			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>sid0814</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 14 days, 18 hours, 48 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				check this out: match no.  9884567.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Lov3orL34ve</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 1 hours, 36 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				haha... yea... they wrote there wad.. == coming soon... damn retarted			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>luggass</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 8 hours, 12 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				guys.... are u all dman retarded....   Replay downloading coming soon! how bitch can u be about it.....   you have to wait ,,, go to bed and cry......			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>jblanch</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 14 hours, 08 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				exactly! how the fuck do you acctually watch these! it doesnt show ANYWHERE			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Ryuzaki5o4</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 14 hours, 11 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				How do i view or download this?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>BIRDGAMES</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 21 hours, 52 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				*-*-*-*-<br />
+			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>komari</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 22 hours, 00 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				nc good fight ^_^ im weak but tereble!<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Elun</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 15 days, 23 hours, 10 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				Cant figgerout how to watch this			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>I_do_work</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 16 days, 3 hours, 38 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				I cant fucking log into HoN WHAT THE FUCK!!!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Gribox</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 16 days, 4 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				goof			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>snkxD</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 16 days, 12 hours, 06 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				lol			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Zeeb</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 16 days, 13 hours, 33 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				lol			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Communist</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 16 days, 16 hours, 37 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				i want to see the match, how can i do that ?<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>jorgeess</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 16 days, 16 hours, 43 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				chupala			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>LiLH0nLiL</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 16 days, 19 hours, 54 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				i want to you would like you are hno<br />
+i will give you to ym....pinoydinglasa			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>LiLH0nLiL</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 16 days, 19 hours, 55 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				hello there?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Holyz</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 1 hours, 06 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				good			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Beiz</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 1 hours, 27 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				Well, it had 12 downloads so far!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ymar</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 2 hours, 32 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				wow! hows lols!!!			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Lamer883</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 3 hours, 58 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				lol			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Zayed</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 4 hours, 21 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				:S			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>belived</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 8 hours, 43 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				nice			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Tezuro</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 9 hours, 03 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				thrtr			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Elche_carlos</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 11 hours, 28 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				nice!!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Dorox</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 12 hours, 01 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				good			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>madsonrox</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 14 hours, 28 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				good			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>zergnsess</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 15 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				CK does not count neutral creeps >> xp for those .:. lego was higher level because he was IN DI JUNGLE			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>runner</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 17 hours, 00 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				how i watch the match? 			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>CsPrisoner</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 17 days, 21 hours, 22 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				good			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>komari</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 0 hours, 32 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				weak<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>hahaguai110</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 5 hours, 20 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				legion team ni strenger than hellbourne			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>CompLounge_3</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 11 hours, 06 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				blue dosent hav the most xp/min because he lost alot from dieing more then guy in second			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Xcstacy</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 14 hours, 51 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				When are they going to introduce the replay videos ?			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>G4z3ll3</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 15 hours, 31 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				How can I watch this replay?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Wycked</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 19 hours, 05 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Did someone else notice that witchslayer is lvl 13 with an average XP-rate of 436, and Legionaire is lvl 14 with a lower XP-rate? What happened there? :-P			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Hitokiri91</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 19 hours, 39 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				how i watch the match?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Hitokiri91</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 19 hours, 40 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how i watch the match?			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ellR</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 18 days, 19 hours, 41 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				MAJU<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>pakudaga</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 19 days, 12 hours, 59 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				tae mas magalling pa q sa mga noobs nayan tra 1v1 pm me pota amp			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>CaparroZ</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 19 days, 20 hours, 18 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				How i watch?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>jerrypower</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 19 days, 20 hours, 50 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				@HoneD<br />
+he have alot of HK and can have got the lvls from then and not killing much creeps and maybe assists too wich we cant see O.o			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>i3ooya</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 19 days, 22 hours, 44 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				?<br />
+			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>marchundy</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 6 hours, 02 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				 WTF			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>The_Month</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 10 hours, 42 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				zzz			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>HoneD</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 11 hours, 10 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				how does it work that blue, the highest lvl doesn\&#039;t have the highest xp/min?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>HoneD</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 11 hours, 11 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				wtf how does it work that the highest lvl doesnt have the highest xp/min?			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Immo404</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 15 hours, 23 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				Wow the final push was awesome!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Death_Spirit</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 19 hours, 02 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				legionnier in game and 0 neural kill?? noob			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>JjKing</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 20 days, 21 hours, 25 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				How can I watch the replays?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Justango</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 4 hours, 17 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				coming when? :P .. I wanna watch my replays :D			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>TK_Rafa</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 11 hours, 53 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				good			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>madsonrox</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 14 hours, 09 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				hoool replay!!!<br />
+			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>marmaru</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 20 hours, 17 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				how can i download dis replay?<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>gzj76251</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 21 hours, 14 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				ssssssssssssssssssssss			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>l3eas7</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 21 days, 21 hours, 45 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				wow... the most awesome game ive seen in a while, the stats may look pretty shocking but it was a good game indeed.<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>l3eas7</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 21 hours, 46 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				penis			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Mr_Cube</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 21 days, 23 hours, 32 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				just testing			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>iyakuzaa</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 22 days, 7 hours, 04 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				Awesome match, espc. 5:00.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>moymoy635</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 22 days, 10 hours, 25 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				hellbourne rules			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Wyxor</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 22 days, 21 hours, 45 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				Faq.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Willis_Ax</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 6 hours, 40 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Yeah is there a way to view the replay yet? O_o			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>nagawolfwood</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 7 hours, 50 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				im doing your mum tonight			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>InsaneChef</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 8 hours, 37 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				5:00 WAS GREAT			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Zelm</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 8 hours, 39 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				How come some ppl comment on the replay when it says: \"Replay downloading coming soon!\"? Am I missing something here?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>TheFeast</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 8 hours, 44 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				It was a good one. I really liked the final push. There were like many kds			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>dun3cat</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 12 hours, 05 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				wut no scout :O dissapointed			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>d0ke</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 14 hours, 24 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				wow			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>idontcar3</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 22 hours, 10 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				noobas			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>oloG2pdolo</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 23 days, 22 hours, 54 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				ดี ......			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Kikiyo</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 24 days, 8 hours, 24 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				nice... good game			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ameleet</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 24 days, 17 hours, 47 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				It\&#039;s not available to watch replays yet ffs guys.			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Vikingurin</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 24 days, 19 hours, 08 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				wow:) great match! nice play by peebles<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Cocktail</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 3 hours, 15 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				nc 1<br />
+
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>heore</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 25 days, 3 hours, 39 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				WTF thers no video<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Modwolf</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 6 hours, 25 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				It was an awesome match			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>oOgusteruOo</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 16 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				oh my god!			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>zSOULz</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 18 hours, 56 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				wow!<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>delux123</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 19 hours, 48 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				learn to wait..... qq			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>MrWHINEhouse</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 21 hours, 10 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				can u read????<br />
+\"Replay download coming soon!\"<br />
+u idiots... noone saw the video.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Vincento</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 25 days, 23 hours, 25 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				ofc not its not available yet!<br />
+guys learn to read			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>qidoxo</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 1 hours, 33 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				dlink ?			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>callus</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 4 hours, 21 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				potanginanyo mnga weak			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>callus</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 4 hours, 22 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				potanginanyo mnga weak			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>MnM36</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 7 hours, 05 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				it\&#039;s standing there that you cant see it yet			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Bli7z</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 8 hours, 10 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				yeah... how to see it? uh?			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>MrBonnichsen</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 8 hours, 35 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				how to watch T_T ?<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Gambitho</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 9 hours, 13 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				LOL<br />
+
+ i cant see ! this video and i cant DOwnload			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>gaza_galist</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 26 days, 13 hours, 51 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				teehee<br />
+de gaza coming, all allyuh gully men gon way			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>horacemouth</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 20 hours, 49 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				how to see			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>elsosio</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 26 days, 22 hours, 42 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how can i watch this replay?i can`t see anyone :SS			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>`Oops</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 28 days, 0 hours, 10 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				nice			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Bendernx7</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 28 days, 3 hours, 31 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				WHY IS THIS THE MOST VIEWED MATCH?!?!?!?! xD			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>vulkanito</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 28 days, 8 hours, 36 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				=O nice fight!<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>So_Greedy</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 28 days, 14 hours, 27 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				wow ganda amf!!!!			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ToDeSFuGe</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 28 days, 21 hours, 20 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				why should i rate a game i have not seen???? Is there any possibility to watch the replay? If not, we dont need this feature yet.....			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>CsPrisoner</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 28 days, 22 hours, 29 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				mun mak			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>BigHum01</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 0 hours, 24 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				lol			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ione21</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 2 hours, 00 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				no dy nt noob just lag and look like noob<br />
+			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>daryl0301</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 2 hours, 34 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				noobs game?.. only 20 mins??.. anyane can do that if the enemy is super noobish..			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>ravizz</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 3 hours, 23 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				.,.,wOw			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>xruel15</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 3 hours, 33 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				ok its cool			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>The_Month</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 7 hours, 47 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				asd<br />
+
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>yepwingtim</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 29 days, 7 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				tawr			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>llNonna</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 13 hours, 00 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				:O			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>G0X</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 29 days, 13 hours, 26 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				lol			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>ArcaneBus</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 15 hours, 02 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				Lol @ all the idiots that can\&#039;t read. This game has got to have more fat retards than DotA. \"Replay downloading coming soon!\"<br />
+<br />
+Morons hahahahaha.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>kvra</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 15 hours, 16 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				yeah how can we view the match???????  (2)			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>alfaX</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 17 hours, 09 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				how watch the match?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>God_Creater</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 20 hours, 31 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				see nothing~			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>God_Creater</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 20 hours, 32 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				see nothing~			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>zhinx</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 21 hours, 18 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				how cool			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>KisHkoBehh</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 29 days, 23 hours, 21 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				F*cking match			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Brotherhod</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 1 hours, 03 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				yeah how can we view the match???????			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Botchokoy</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 1 hours, 20 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				how can i view the match??			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>ozloov</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 3 hours, 43 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				gj witch			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>fejaumx</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 10 hours, 21 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				nice			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>TcomJ</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 14 hours, 58 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Slither doesn&#039;t get a lot of kills as always<br />
+
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>SetMe</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 30 days, 16 hours, 40 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				replays how watch It wher&#039;s instruction? :D			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Beaut1ful</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 21 hours, 06 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				:)			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Beaut1ful</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 21 hours, 08 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				:)			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>S3NSE</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 30 days, 22 hours, 46 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				Nice!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>TheGodOfDotA</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 0 hours, 48 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				You are right Kiji, maybe if it had been EM, Hellbourne would have had a chance to farm some items/Lvl.<br />
+Anyways player skill counts.<br />
+Suggestion to anyone, dont let low PSR  players solo mid nor suggest you what hero to pick.			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Kijiyama</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 8 hours, 14 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				Worst match ever. As soon as I saw the make up I just knew how it would end. Hellborne picks suck majorly because not a single person went with a supporter and you have majority carries. If this was EM you win too bad it ain&#039;t.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Stroboscope</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 9 hours, 08 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				brilliant match.			</div>
+
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Stroboscope</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 9 hours, 09 minutes ago </span>
+
+				</div>
+			</div>
+			<div>
+				brilliant match.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>Stalias</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 10 hours, 14 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				WOOOOOWEEEE LOOK AT THAT PRO KRAKEN<br />
+
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>nednull</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 31 days, 11 hours, 49 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				How soon is soon..?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>n0x</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 13 hours, 28 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				need the dl :D			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>FeryCZ</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 31 days, 15 hours, 06 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				replay dl nothing????????????			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>HyperActive</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 15 hours, 42 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				hmmm			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Smiledlake</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 31 days, 16 hours, 09 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				0.1.53.2?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>Titant</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 17 hours, 13 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				coming soon! i swear :)			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>skotch007</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 31 days, 20 hours, 36 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				ill will be prety nice when we will be able to  watch<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>iamkvz</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 20 hours, 56 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				how can i view this???<br />
+where to click???			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Anton</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 20 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				test			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>tobbr</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 21 hours, 11 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				how teh fuck do you view it?			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>galanos</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 31 days, 23 hours, 07 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				noob picks :)			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>oA7Xo</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 0 hours, 24 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				...			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>kn0t</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 1 hours, 06 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				this is gonna be bad ass!			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Jainay</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 1 hours, 51 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				Guys, the download fucntion is not up yet, stop saying you can&#039;t see it, it&#039;s because it&#039;s not possible yet.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+
+				<span class="o14"><b>pyrotrojan</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 3 hours, 02 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				lolz wheres the download button?<br />
+
+			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>cptgame</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 32 days, 3 hours, 40 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				replay dl coming soon?????wtf!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+
+				<div style="float: left;;">
+				<span class="o14"><b>`Kimlikeme</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 3 hours, 50 minutes ago </span>
+				</div>
+			</div>
+			<div>
+
+				lol no support hero in hellbourne how can they win if there hero is like that. zzzz			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>spineshankk</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+
+					<span class="bl12">Posted 32 days, 4 hours, 48 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				why announce if u cant DL lol<br />
+			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>CYKOactiv</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 6 hours, 45 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				its quite obvious who the winner is..the team on the left has got disablers and tanks..no way right team can win..moon queen and blood for a clan game is just fail..			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Shigui</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 6 hours, 46 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				nice			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Tig3R</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 6 hours, 55 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				Nice			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Yoshiie</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 6 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				great news !			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>antiantic</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 7 hours, 02 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				I cant wait, this will be great.!			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>faeton</b></span>
+				</div>
+
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 7 hours, 17 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				0.1.53.2?			</div>
+		</div>
+    		<div class="commentbg1">
+
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Tassels</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 7 hours, 33 minutes ago </span>
+				</div>
+			</div>
+
+			<div>
+				They haven&#039;t enabled actually watching and downloading the replay yet. Keep your pants on, guys.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Satyroi</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 8 hours, 37 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				cant view it D:			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Satyroi</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 8 hours, 41 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				cant view it D:			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Zimter</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 8 hours, 47 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				woop!! what a nooby pebblz huh!			</div>
+		</div>
+
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Calaglinv</b></span>
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 8 hours, 48 minutes ago </span>
+				</div>
+
+			</div>
+			<div>
+				Same.			</div>
+		</div>
+    		<div class="commentbg1">
+			<div style="height: 20px;">
+				<div style="float: left;;">
+				<span class="o14"><b>Wihl</b></span>
+
+				</div>
+				<div style="float: right; padding-right: 8px;">
+					<span class="bl12">Posted 32 days, 8 hours, 57 minutes ago </span>
+				</div>
+			</div>
+			<div>
+				Just testing the comment system.			</div>
+		</div>
+
+    	</div>
+</div>
+
+<!-- Player Stats Poop -->
+<div name="player_stats_blocker" id="player_stats_blocker" style="position: absolute; min-height: 100%; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; opacity:.60;filter: alpha(opacity=60); -moz-opacity: 0.6; display: none;"></div>
+<div name="player_stats" id="player_stats"  style="position: absolute; top:200px; left: 50%; height: 700px; width:952px; margin-left: -476px; z-index: 1001; text-align: left; display: none;">
+
+	<div class="win-stone_content" id="win-stone_content" name="win-stone_content">
+
+	</div>
+
+	<div class="win-stone_l"></div>
+	<div class="win-stone_r"></div>
+
+	<div class="win-stone_t"></div>
+	<div class="win-stone_b"></div>
+	<div class="win-stone_top_ornate"></div>
+	<div class="win-stone_tr_ornate"></div>
+	<div class="win-stone_tl_ornate"></div>
+	<div class="win-stone_br_ornate"></div>
+	<div class="win-stone_bl_ornate"></div>
+
+</div>
+
+<div id="clearfooter"></div>
+</div>
+
+<div id="footer">
+	<img src="http://www.heroesofnewerth.com/images/footer_vines_left.gif" width="250" height="94" border="0" style="position: absolute; left: 0; bottom: 0; z-index: 5;">
+	<img src="http://www.heroesofnewerth.com/images/footer_vines_right.gif" width="250" height="94" border="0" style="position: absolute; right: 0; bottom: 0; z-index: 5;">
+	<img src="http://www.heroesofnewerth.com/images/s2games.gif" width="53" height="60" border="0" style="position: absolute; left: 8px; bottom: 8px; z-index: 10;">
+
+	<div style="position:absolute; left: 0; bottom:4px; height:102px; width: 100%;"><img src="http://www.heroesofnewerth.com/images/footer_center.png" width="478" height="102"></div>
+
+	<div style="position:absolute; left: 0; bottom:4px; height:140px; width: 50%; text-align: right;"><img src="http://www.heroesofnewerth.com/images/footer_legion.gif" width="246" height="140" style="padding-right: 200px;"></div>
+
+	<div style="position:absolute; right: 0; bottom:4px; height:140px; width: 50%; text-align: left;"><img src="http://www.heroesofnewerth.com/images/footer_hellbourne.gif" width="246" height="140" style="padding-left: 200px;"></div>
+		<div style="position:absolute; left: 0; bottom:0; height:134px; width: 100%;" class="w12">&copy;2009 S2 Games, All Rights Reserved.<br><a href="http://www.heroesofnewerth.com/privacy.php">Privacy Policy</a> | <a href="http://www.heroesofnewerth.com/fsk/fan_site_kit.zip">Fansite Kit</a> | <a href="http://www.heroesofnewerth.com/community_links.php">Community Links</a></div>
+</div>
+
+<div id="acctbox_0" name="acctbox_0" class="acct_box_collapsed" style="display: none;">
+	<div class="acct_boxcontent_collapsed">
+
+		<span class="w12" style="color: white;"><b>Username</b></span><img src="http://www.heroesofnewerth.com/images/arrow.gif" style="padding: 0 8px;"><a href="javascript:void(0);" onClick="hideIt('acctbox_0'); showIt('acctbox_2');">Not Logged In</a>
+	</div>
+	<div class="acct_boxslider acct_boxslider-login"><a href="javascript:void(0);" onClick="hideIt('acctbox_0'); showIt('acctbox_2');"></a></div>
+</div>
+
+<div id="acctbox_1" name="acctbox_1" class="acct_box_collapsed" style="display: none;">
+	<div class="acct_boxcontent_collapsed">
+		<span class="w12" style="color: white;"><b>Username</b></span><img src="http://www.heroesofnewerth.com/images/arrow.gif" style="padding: 0 8px;"><a href="javascript:void(0);" onClick="hideIt('acctbox_0'); showIt('acctbox_2');"></a>
+	</div>
+
+	<div class="acct_boxslider acct_boxslider-acct"><a href="javascript:void(0);" onClick="hideIt('acctbox_1'); showIt('acctbox_2');"></a></div>
+</div>
+
+<div id="acctbox_2" name="acctbox_2" class="acct_box_expanded" style="display: block;">
+	<div class="acct_boxcontent">
+
+		
+		<!-- Logged Out -->
+		<form action="http://www.heroesofnewerth.com/login.php?return=true" method="post">
+		<div style="height: 28px;">
+			<div style="float: left; padding-top: 7px; width: 65px;">
+				<span class="w12" style="color: white;"><b>Username:</b></span>
+
+			</div>
+			<div style="float: left; width: 25px; height: 100%; background: url(http://www.heroesofnewerth.com/images/arrow.gif) center center no-repeat;">&nbsp;</div>
+			<div class="textinput" style="float: left; width: 110px;">
+				<b class="top"><b class="b1"></b><b class="b2"></b><b class="b3"></b><b class="b4"></b></b>
+				<div class="boxcontent" style="text-align: center;">
+					<input type="text" name="username" style="background: #11131e; color: #dcdcdc; border: 0px; width: 94%;">
+				</div>
+				<b class="bottom"><b class="b4b"></b><b class="b3b"></b><b class="b2b"></b><b class="b1b"></b></b>
+			</div>
+
+		</div>
+		<div style="height: 28px; margin-top: 8px;">
+			<div style="float: left; padding-top: 7px; width: 65px;">
+				<span class="w12" style="color: white;"><b>Password:</b></span>
+			</div>
+			<div style="float: left; width: 25px; height: 100%; background: url(http://www.heroesofnewerth.com/images/arrow.gif) center center no-repeat;">&nbsp;</div>
+			<div class="textinput" style="float: left; width: 110px;">
+				<b class="top"><b class="b1"></b><b class="b2"></b><b class="b3"></b><b class="b4"></b></b>
+
+				<div class="boxcontent" style="text-align: center;">
+					<input type="password" name="password" style="background: #11131e; color: #dcdcdc; border: 0px; width: 94%;">
+				</div>
+				<b class="bottom"><b class="b4b"></b><b class="b3b"></b><b class="b2b"></b><b class="b1b"></b></b>
+			</div>
+		</div>
+		<div style="height: 25px; margin-top: 8px;">
+			<div style="float: left; padding-top: 4px;">
+				<a href="" class="o10">Lost Password?</a>
+
+			</div>
+			<div style="float: right;">
+				<input type="submit" class="button75" value="Login">
+			</div>
+		</div>
+		</form>
+		
+
+
+	</div>
+	<div class="acct_boxslider acct_boxslider-close"><a href="javascript:void(0);" onClick="hideIt('acctbox_2'); showIt('acctbox_0');"></a></div>
+</div><div id="giftbox" name="giftbox" class="gift_box_expanded" style="display: block; position: absolute;">
+
+	<div style="position: absolute; bottom: 12px; left: 12px; width: 220px; height: 113px; background: url('http://www.heroesofnewerth.com/images/gift_widget.gif') #000 no-repeat;">
+		<a href="http://www.heroesofnewerth.com/gift/" style="display:block; height: 100%; text-decoration: none;"></a>	
+	</div>
+</div>
+</body>
+</html>

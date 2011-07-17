@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SadPanda.Services", "SadPanda.Services\SadPanda.Services.csproj", "{2630B1D0-025E-4764-8E52-3839695B1045}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SC2ReplayClient", "SC2ReplayClient\SC2ReplayClient.csproj", "{77EBC295-849C-4E83-95D1-14C860F432E2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2630B1D0-025E-4764-8E52-3839695B1045}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2630B1D0-025E-4764-8E52-3839695B1045}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2630B1D0-025E-4764-8E52-3839695B1045}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2630B1D0-025E-4764-8E52-3839695B1045}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77EBC295-849C-4E83-95D1-14C860F432E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77EBC295-849C-4E83-95D1-14C860F432E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77EBC295-849C-4E83-95D1-14C860F432E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77EBC295-849C-4E83-95D1-14C860F432E2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

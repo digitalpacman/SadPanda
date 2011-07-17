@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7F293DCF-1E3C-4ED3-8DF1-6435AD118279}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SqlHelper</RootNamespace>
+    <AssemblyName>SqlHelper</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MySql.Data, Version=6.1.2.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="File\FlatFile.cs" />
+    <Compile Include="Mail\MIME\Attachment.cs" />
+    <Compile Include="Mail\MIME\Decode\Base64.cs" />
+    <Compile Include="Mail\MIME\Decode\EncodedWord.cs" />
+    <Compile Include="Mail\MIME\Decode\QuotedPrintable.cs" />
+    <Compile Include="Mail\MIME\Header\ContentTransferEncoding.cs" />
+    <Compile Include="Mail\MIME\Header\HeaderExtractor.cs" />
+    <Compile Include="Mail\MIME\Header\HeaderFieldParser.cs" />
+    <Compile Include="Mail\MIME\Header\MessageHeader.cs" />
+    <Compile Include="Mail\MIME\Header\MessageImportance.cs" />
+    <Compile Include="Mail\MIME\Message.cs" />
+    <Compile Include="Mail\MIME\MIMETypes.cs" />
+    <Compile Include="Mail\MIME\TNEFAttachment.cs" />
+    <Compile Include="Mail\MIME\TNEFParser.cs" />
+    <Compile Include="Mail\MIME\Utility.cs" />
+    <Compile Include="Mail\POP3\AuthenticationMethod.cs" />
+    <Compile Include="Mail\POP3\Exceptions.cs" />
+    <Compile Include="Mail\POP3\Logger.cs" />
+    <Compile Include="Mail\POP3\MD5.cs" />
+    <Compile Include="Mail\POP3\POPClient.cs" />
+    <Compile Include="SqlHelper.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
