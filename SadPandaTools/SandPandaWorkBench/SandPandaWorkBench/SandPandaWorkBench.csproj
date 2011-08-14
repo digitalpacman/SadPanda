@@ -111,13 +111,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
-    <Compile Include="Quad.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SadPandaTools\SadPandaTools.csproj">
+      <Project>{7BEB07D9-C72E-4261-8795-FC3790DFC14F}</Project>
+      <Name>SadPandaTools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SandPandaWorkBenchContent\SandPandaWorkBenchContent.contentproj">
       <Name>SandPandaWorkBenchContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>

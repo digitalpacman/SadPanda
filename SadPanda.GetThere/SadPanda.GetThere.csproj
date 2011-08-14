@@ -120,6 +120,10 @@
       <Name>SadPanda.GetThereContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
     </ProjectReference>
+    <ProjectReference Include="..\SadPandaTools\SadPandaTools\SadPanda.Tools.csproj">
+      <Project>{7BEB07D9-C72E-4261-8795-FC3790DFC14F}</Project>
+      <Name>SadPanda.Tools</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
