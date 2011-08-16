@@ -43,6 +43,7 @@ namespace SadPanda.Tools
             Normal = normal;
             Up = up;
             Height = height;
+
             Width = width;
 
             Left = Vector3.Cross(Normal, Up);
@@ -58,7 +59,7 @@ namespace SadPanda.Tools
         private void FillVertices()
         {
             // Fill in texture coordinates to display full texture
-            // on quad
+            // on quad.
             Vector2 textureUpperLeft = new Vector2(0.0f, 0.0f);
             Vector2 textureUpperRight = new Vector2(1.0f, 0.0f);
             Vector2 textureLowerLeft = new Vector2(0.0f, 1.0f);
