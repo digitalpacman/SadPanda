@@ -1,0 +1,24 @@
+[33mcommit 4956787364b2e132087f9221e97b58bc26562f86[m
+Author: Brad Laney <digitalpacman@hotmail.com>
+Date:   Sat Jul 16 23:22:34 2011 -0500
+
+    stuff
+
+[33mcommit b60d5e3da37de00288ae0d5b33696bf52231c837[m
+Merge: 3be401c 01592bf
+Author: Brad Laney <digitalpacman@hotmail.com>
+Date:   Sat Jul 16 23:12:04 2011 -0500
+
+    Merge github.com:digitalpacman/SadPanda
+
+[33mcommit 3be401c4db819e0321fa8ee780083884f4f704c8[m
+Author: Brad Laney <digitalpacman@hotmail.com>
+Date:   Sat Jul 16 23:04:40 2011 -0500
+
+    init repo
+
+[33mcommit 01592bf04711429cb31dc33f95ca20edfc94253f[m
+Author: Brad Laney <digitalpacman@hotmail.com>
+Date:   Sat Jul 16 21:00:48 2011 -0500
+
+    first commit
