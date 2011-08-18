@@ -2,11 +2,21 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Threading;
 
 namespace SadPanda.GetThere
 {
-    class UseObject
+    public class UseObject
     {
+        private ContentManager content;
+        private Timer stateTimer;
+        private bool isLocked = true;
+
+        public UseObject(ContentManager contentManager)
+        {
+            content = contentManager;
+        }
+
         //Players image
         public Texture2D UseObjectTexture;
 
@@ -31,7 +41,54 @@ namespace SadPanda.GetThere
         {
             get { return UseObjectTexture.Height; }
         }
-        
+
+        public bool TurnOn()
+        {
+            if (!isLocked)
+                return false;
+
+            LockState();
+
+
+            UseObjectTexture = content.Load<Texture2D>("useComputerOn");
+            Active = true;
+
+            BeginReleaseState();
+
+            return true;
+        }
+
+        private void LockState()
+        {
+            isLocked = false;
+        }
+
+        private void BeginReleaseState()
+        {
+            stateTimer = new Timer(ReleaseState, null, 1000, 1000);
+        }
+
+        private void ReleaseState(Object stateInfo)
+        {
+            stateTimer.Dispose();
+            isLocked = true;
+        }
+
+        public bool TurnOff()
+        {
+            if (!isLocked)
+                return false;
+
+            LockState();
+
+
+            UseObjectTexture = content.Load<Texture2D>("useComputeroff");
+            Active = false;
+
+            BeginReleaseState();
+
+            return true;
+        }
 
         public void Initialize(Texture2D texture, Vector2 position)
         {
@@ -47,12 +104,6 @@ namespace SadPanda.GetThere
             //set health
             Health = 100;
 
-        }
-
-        //Load the texture for the sprite using the Content Pipeline
-        public void LoadContent(ContentManager theContentManager, string theAssetName)
-        {
-            UseObjectTexture = theContentManager.Load<Texture2D>(theAssetName);
         }
 
         public void Update()

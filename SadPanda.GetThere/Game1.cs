@@ -53,7 +53,7 @@ namespace SadPanda.GetThere
             playerMoveSpeed = 8.0f;
 
             //initialize a useable object
-            testUseObject = new UseObject();
+            testUseObject = new UseObject(this.Content);
 
             base.Initialize();
            
@@ -74,7 +74,7 @@ namespace SadPanda.GetThere
             player.Initialize(Content.Load<Texture2D>("player"), playerPosition);
 
             //load useable object resources
-            testUseObject.LoadContent(this.Content, "useComputeroff");
+            testUseObject.TurnOff();
             testUseObject.Position = new Vector2(125, 245);
         }
 
@@ -105,6 +105,8 @@ namespace SadPanda.GetThere
 
             // Update the useable object
             UpdateUseObject();
+
+            previousKeyboardState = currentKeyboardState;
 
             base.Update(gameTime);
         }
@@ -167,12 +169,13 @@ namespace SadPanda.GetThere
             {
                 player.Initialize(Content.Load<Texture2D>("playerQuestion"), player.Position);
                 //use ability
-                if (currentKeyboardState.IsKeyDown(Keys.E))
+                if (currentKeyboardState.IsKeyDown(Keys.E) && !previousKeyboardState.IsKeyDown(Keys.E))
                 {
-                    testUseObject.LoadContent(this.Content, "useComputerOn");
+                    if (testUseObject.Active)
+                        testUseObject.TurnOff();
+                    else
+                        testUseObject.TurnOn();
                 }
-                
-
             }
             else
             {
