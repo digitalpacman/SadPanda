@@ -1,16 +1,22 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SadPanda.Tools.Sprites;
+using SadPanda.Tools;
 
 namespace SadPanda.GetThere
 {
     class Player
     {
+        GraphicsDeviceManager graphics;
+
         //Players image
         public Texture2D PlayerTexture;
+        public BasicSprite sprite;
+        BasicEffect spriteEffect;
 
         //player position
-        public Vector2 Position;
+        public Quad Position;
 
         //State of character: selected or not
         public bool Active;
@@ -24,6 +30,14 @@ namespace SadPanda.GetThere
             get { return PlayerTexture.Width; }
         }
 
+        public Player(GraphicsDeviceManager _graphics )
+        { 
+            graphics = _graphics;
+            spriteEffect = new BasicEffect(graphics.GraphicsDevice);
+
+            Position = new Quad(new Vector3(0, 50, 0), Vector3.Backward, Vector3.Up, 100, 100);
+        
+        }
 
         //players size in height
         public int Height
@@ -32,19 +46,18 @@ namespace SadPanda.GetThere
         }
         
 
-        public void Initialize(Texture2D texture, Vector2 position)
+        public void Initialize(Texture2D texture)
         {
             //set texture
             PlayerTexture = texture;
-
-            //starting position of character
-            Position = position;
 
             //set state
             Active = true;
 
             //set health
             Health = 100;
+
+            sprite = new BasicSprite(graphics.GraphicsDevice, Position, spriteEffect, PlayerTexture);
 
         }
 
@@ -54,7 +67,7 @@ namespace SadPanda.GetThere
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(PlayerTexture, Position, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            
         }
     }
 }

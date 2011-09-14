@@ -20,10 +20,10 @@ namespace SadPanda.Tools.Sprites
         List<BasicSprite> sprites = new List<BasicSprite>();
         Camera camera;
 
-        public SpriteManager(Game game)
+        public SpriteManager(Game game, Camera _camera)
             : base(game)
         {
-            // TODO: Construct any child components here
+            camera = _camera;
         }
 
         /// <summary>

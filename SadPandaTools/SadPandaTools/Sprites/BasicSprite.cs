@@ -25,16 +25,24 @@ namespace SadPanda.Tools.Sprites
 
         protected Matrix world = Matrix.Identity;
 
+        GraphicsDevice device;
 
-        public BasicSprite(Quad _quad, BasicEffect _effect, Texture2D _texture)
+        public BasicSprite(GraphicsDevice _device, Quad _quad, BasicEffect _effect, Texture2D _texture)
         {
             quad = _quad;
             effect = _effect;
             texture = _texture;
+            device = _device;
+        }
+
+        public void Initialize()
+        {
+            //quad = new Quad(new Vector3(0, 50, 0), Vector3.Backward, Vector3.Up, 100, 100);
         }
 
         public void Draw(Camera camera)
         {
+
             effect.EnableDefaultLighting();
             effect.World = Matrix.Identity;
             effect.View = camera.view;
@@ -42,6 +50,17 @@ namespace SadPanda.Tools.Sprites
             effect.TextureEnabled = true;
             effect.Texture = texture;
             effect.Alpha = 1;
+
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.BlendState = BlendState.AlphaBlend;
+                device.RasterizerState = RasterizerState.CullNone;
+                device.DrawUserIndexedPrimitives<VertexPositionNormalTexture>(PrimitiveType.TriangleList,
+                    quad.Vertices, 0, 4,
+                    quad.Indexes, 0, 2);
+                device.BlendState = BlendState.Opaque;
+            }
         }
 
         public virtual Matrix GetWorld()

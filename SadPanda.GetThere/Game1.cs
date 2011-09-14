@@ -8,6 +8,8 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using SadPanda.Tools;
+using SadPanda.Tools.Sprites;
 
 namespace SadPanda.GetThere
 {
@@ -16,24 +18,29 @@ namespace SadPanda.GetThere
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        Camera camera;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        
+        SpriteManager spriteManager;
         //Represents the player
         Player player;
 
         //represents the useable object
-        UseObject testUseObject; 
+        UseObject testUseObject;
 
         KeyboardState currentKeyboardState;
         KeyboardState previousKeyboardState;
 
+
+        BasicEffect effect;
         float playerMoveSpeed;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            
+
         }
 
         /// <summary>
@@ -44,16 +51,26 @@ namespace SadPanda.GetThere
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            //setting up 3d camera
+            camera = new Camera(this, new Vector3(0, 0, 5), Vector3.Zero, Vector3.Up);
+            Components.Add(camera);
+            spriteManager = new SpriteManager(this, camera);
+            spriteManager.Enabled = true;
+           
+            Components.Add(spriteManager);
+            //3d effects initialization
+            effect = new BasicEffect(graphics.GraphicsDevice);
 
             //Initialize player class
-            player = new Player();
+            player = new Player(graphics);
 
             //Set Speed of player
             playerMoveSpeed = 8.0f;
 
             //initialize a useable object
             testUseObject = new UseObject(this.Content);
+
+           
 
             base.Initialize();
            
@@ -71,8 +88,9 @@ namespace SadPanda.GetThere
             // TODO: use this.Content to load your game content here
             //Load Player resources
             Vector2 playerPosition = new Vector2(GraphicsDevice.Viewport.TitleSafeArea.X, GraphicsDevice.Viewport.TitleSafeArea.Y + GraphicsDevice.Viewport.TitleSafeArea.Height / 2);
-            player.Initialize(Content.Load<Texture2D>("player"), playerPosition);
+            player.Initialize(Content.Load<Texture2D>("player"));
 
+            spriteManager.LoadSprite(player.sprite);
             //load useable object resources
             testUseObject.TurnOff();
             testUseObject.Position = new Vector2(125, 245);
@@ -116,19 +134,19 @@ namespace SadPanda.GetThere
             //basic movement
             if (currentKeyboardState.IsKeyDown(Keys.A))
             {
-                player.Position.X -= playerMoveSpeed;
+                player.Position.Origin.X -= playerMoveSpeed;
             }
             if (currentKeyboardState.IsKeyDown(Keys.D))
             {
-                player.Position.X += playerMoveSpeed;
+                player.Position.Origin.X += playerMoveSpeed;
             }
             if (currentKeyboardState.IsKeyDown(Keys.W))
             {
-                player.Position.Y -= playerMoveSpeed;
+                player.Position.Origin.Y -= playerMoveSpeed;
             }
             if (currentKeyboardState.IsKeyDown(Keys.S))
             {
-                player.Position.Y += playerMoveSpeed;
+                player.Position.Origin.Y += playerMoveSpeed;
             }
 
 
@@ -139,8 +157,8 @@ namespace SadPanda.GetThere
             }
 
             // Make sure that the player does not go out of bounds
-            player.Position.X = MathHelper.Clamp(player.Position.X, 0, GraphicsDevice.Viewport.Width - player.Width);
-            player.Position.Y = MathHelper.Clamp(player.Position.Y, 0, GraphicsDevice.Viewport.Height - player.Height);
+            player.Position.Origin.X = MathHelper.Clamp(player.Position.Origin.X, 0, GraphicsDevice.Viewport.Width - player.Width);
+            player.Position.Origin.Y = MathHelper.Clamp(player.Position.Origin.Y, 0, GraphicsDevice.Viewport.Height - player.Height);
 
         }
 
@@ -152,8 +170,8 @@ namespace SadPanda.GetThere
             Rectangle rectangle2;
 
             // Only create the rectangle once for the player
-            rectangle1 = new Rectangle((int)player.Position.X,
-            (int)player.Position.Y,
+            rectangle1 = new Rectangle((int)player.Position.Origin.X,
+            (int)player.Position.Origin.Y,
             player.Width,
             player.Height);
 
@@ -167,7 +185,7 @@ namespace SadPanda.GetThere
             // other
             if (rectangle1.Intersects(rectangle2))
             {
-                player.Initialize(Content.Load<Texture2D>("playerQuestion"), player.Position);
+                player.Initialize(Content.Load<Texture2D>("playerQuestion"));
                 //use ability
                 if (currentKeyboardState.IsKeyDown(Keys.E) && !previousKeyboardState.IsKeyDown(Keys.E))
                 {
@@ -179,7 +197,7 @@ namespace SadPanda.GetThere
             }
             else
             {
-                player.Initialize(Content.Load<Texture2D>("player"), player.Position);
+                player.Initialize(Content.Load<Texture2D>("player"));
             }
 
          }
@@ -192,6 +210,7 @@ namespace SadPanda.GetThere
         {
             GraphicsDevice.Clear(Color.Beige);
 
+            spriteManager.Draw(gameTime);
             //Start Drawing
             spriteBatch.Begin();
 
@@ -202,6 +221,7 @@ namespace SadPanda.GetThere
 
             //Stop drawing
             spriteBatch.End();
+
 
             // TODO: Add your drawing code here
 

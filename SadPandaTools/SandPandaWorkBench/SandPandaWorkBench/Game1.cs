@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using SadPandaTools;
+using SadPanda.Tools;
 
 namespace SandPandaWorkBench
 {
@@ -162,7 +162,7 @@ namespace SandPandaWorkBench
 
                 device.BlendState = BlendState.AlphaBlend;
                 device.RasterizerState = RasterizerState.CullNone;
-                GraphicsDevice.DrawUserIndexedPrimitives
+                device.DrawUserIndexedPrimitives
                     <VertexPositionNormalTexture>(
                     PrimitiveType.TriangleList,
                     quad.Vertices, 0, 4,
