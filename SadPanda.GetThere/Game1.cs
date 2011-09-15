@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using SadPanda.Tools;
 using SadPanda.Tools.Sprites;
+using SadPanda.Tools.Maps;
 
 namespace SadPanda.GetThere
 {
@@ -24,6 +25,9 @@ namespace SadPanda.GetThere
         SpriteManager spriteManager;
         //Represents the player
         Player player;
+
+        //represents the current map
+        Map currentMap;
 
         //represents the useable object
         UseObject testUseObject;
@@ -63,6 +67,9 @@ namespace SadPanda.GetThere
 
             //Initialize player class
             player = new Player(graphics);
+
+            //intialize current map (this will probably be moved in the future)
+            currentMap = new Map("", this.Content);
 
             //Set Speed of player
             playerMoveSpeed = 8.0f;
@@ -213,6 +220,9 @@ namespace SadPanda.GetThere
             spriteManager.Draw(gameTime);
             //Start Drawing
             spriteBatch.Begin();
+
+            //draw map
+            currentMap.Draw(spriteBatch);
 
             //Draw the player
             player.Draw(spriteBatch);

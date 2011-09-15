@@ -93,6 +93,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Camera.cs" />
+    <Compile Include="Maps\Map.cs" />
+    <Compile Include="Maps\Tile.cs" />
+    <Compile Include="Maps\TileType.cs" />
     <Compile Include="Models\BasicModel.cs" />
     <Compile Include="Models\ModelManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
