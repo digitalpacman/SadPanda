@@ -19,8 +19,8 @@ namespace SadPanda.GetThere
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        Camera camera;
         GraphicsDeviceManager graphics;
+        Camera camera;
         SpriteBatch spriteBatch;
         SpriteManager spriteManager;
         //Represents the player
@@ -43,8 +43,6 @@ namespace SadPanda.GetThere
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            
-
         }
 
         /// <summary>
